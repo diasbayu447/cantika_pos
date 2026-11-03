@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Gladi Bersih Total - Cantika POS (Capstone UT)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #d17885;
+            --primary-light: #fdf2f4;
+            --primary-dark: #b55d6a;
+            --ut-blue: #003399;
+            --ut-yellow: #ffcc00;
+        }
+        body {
+            background-color: #f7f4f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            padding-bottom: 60px;
+        }
+        .hero-banner {
+            background: linear-gradient(135deg, #d17885 0%, #a8505d 100%);
+            color: white;
+            padding: 32px 24px;
+            border-bottom: 4px solid var(--ut-yellow);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .sticky-progress {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e9ecef;
+            padding: 12px 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+        .phase-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .phase-header {
+            background-color: var(--primary-light);
+            border-bottom: 2px solid #f2cdd2;
+            padding: 16px 24px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-row {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f1f1;
+            transition: background-color 0.2s;
+        }
+        .task-row:last-child {
+            border-bottom: none;
+        }
+        .task-row.completed {
+            background-color: #f3faf5;
+        }
+        .task-row.completed .task-title {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .form-check-input.task-check {
+            width: 1.4em;
+            height: 1.4em;
+            margin-top: 0.15em;
+            cursor: pointer;
+            border: 2px solid var(--primary);
+        }
+        .form-check-input.task-check:checked {
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .cmd-box {
+            background-color: #1e1e2e;
+            color: #f8f8f2;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .btn-copy {
+            background-color: rgba(255,255,255,0.15);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .btn-copy:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        .saved-input {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .saved-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(209, 120, 133, 0.25);
+        }
+        .badge-step {
+            background-color: var(--primary);
+            color: white;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .phase-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="hero-banner">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="badge bg-warning text-dark fw-bold mb-2">CAPSTONE PROJECT - UNIVERSITAS TERBUKA</span>
+                    <h2 class="fw-bold m-0">👑 Lembar Kerja Gladi Bersih Total (Zero-to-Ready)</h2>
+                    <p class="m-0 mt-1 opacity-90">Urutan Reset Titik Nol, Seeder Owner, Import 386 Produk CSV, & Persiapan Pengujian Cantika POS</p>
+                </div>
+                <div class="d-flex gap-2 no-print">
+                    <button class="btn btn-light fw-bold shadow-sm" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+                    <button class="btn btn-outline-light fw-bold" onclick="resetAllProgress()">🔄 Reset Semua Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STICKY PROGRESS BAR -->
+    <div class="sticky-progress no-print">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-bold small text-dark">📈 Progress Gladi Bersih Sistem:</span>
+                <span class="fw-bold small" id="progressText" style="color: var(--primary-dark);">0 / 0 Langkah Selesai (0%)</span>
+            </div>
+            <div class="progress" style="height: 10px; border-radius: 10px;">
+                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" id="progressBar" role="progressbar" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+
+        <!-- PANEL PARAMETER LINGKUNGAN & SEEDER -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <span>📌 Informasi Titik Nol (DatabaseSeeder.php & File CSV)</span>
+                <span class="badge bg-dark">Referensi Utama</span>
+            </div>
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded h-100" style="background-color: #fdf2f4; border: 1px dashed #d17885;">
+                            <h6 class="fw-bold text-dark mb-2">👑 Akun Default Seeder (Owner)</h6>
+                            <div class="small mb-1">Username: <code class="fw-bold text-dark">owner</code></div>
+                            <div class="small mb-1">Password: <code class="fw-bold text-dark">password123</code></div>
+                            <div class="small mb-1">PIN Otorisasi: <code class="fw-bold text-danger">000000</code> (6 Digit)</div>
+                            <div class="small text-muted">Role: <strong>owner</strong> (Kebal Kick & Hapus)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded h-100" style="background-color: #eef6ff; border: 1px dashed #0d6efd;">
+                            <h6 class="fw-bold text-dark mb-2">🏪 Identitas Toko Default</h6>
+                            <div class="small mb-1">Nama: <strong>CANTIKA AKSESORIS</strong></div>
+                            <div class="small mb-1">Alamat: <strong>Jl. Aksesoris No. 123, Cirebon</strong></div>
+                            <div class="small mb-1">No. WA: <code>+6281234567890</code></div>
+                            <div class="small text-muted">Driver Sesi: <code>SESSION_DRIVER=database</code></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded h-100" style="background-color: #f2faf5; border: 1px dashed #198754;">
+                            <h6 class="fw-bold text-dark mb-2">📦 Statistik CSV Katalog Barang</h6>
+                            <div class="small mb-1">Nama File: <code>import_barang_cantika_numeric.csv</code></div>
+                            <div class="small mb-1">Total Data: <strong>386 Baris Produk</strong></div>
+                            <div class="small text-muted">270 Fisik | 110 Digital Prabayar | 4 PPOB Pascabayar | 2 Jasa Servis</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAHAP 1: RESET DATABASE & SEEDING -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <span>TAHAP 1: Pembersihan Database (Titik Nol) & Eksekusi Seeder</span>
+                <span class="badge-step">Langkah 1 - 4</span>
+            </div>
+            <div>
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_1">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_1">1. Pastikan Server Laragon (MySQL & Apache/Nginx) Aktif dan File Seeder & Logo UT Siap</label>
+                        <p class="text-muted small mb-2">Pastikan file <code>database/seeders/DatabaseSeeder.php</code> sudah berisi seeder akun <code>owner</code> &amp; <code>StoreSetting</code>, serta file logo Universitas Terbuka sudah tersimpan di <code>public/images/logo-ut.svg</code>.</p>
+                        <div class="row g-2 mt-1">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_url_lokal" placeholder="Catat URL Lokal (misal: http://127.0.0.1:8000)">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_url_tunnel" placeholder="Catat URL Tunnel Ngrok/Cloudflare (jika pakai)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_2">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_2">2. Jalankan Perintah Reset Database Total &amp; Seeding Titik Nol</label>
+                        <p class="text-muted small mb-1">Buka Terminal Laragon di direktori proyek <code>C:\laragon\www\cantika_pos</code> lalu jalankan perintah ini untuk menghapus seluruh transaksi uji coba lama dan menanam akun Owner:</p>
+                        <div class="cmd-box">
+                            <span id="cmd_migrate">php artisan migrate:fresh --seed</span>
+                            <button class="btn-copy" onclick="copyText('cmd_migrate', this)">Salin Perintah</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_3">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_3">3. Bersihkan Cache Konfigurasi, Route, dan View Laravel</label>
+                        <p class="text-muted small mb-1">Pastikan perubahan terbaru pada <code>AuthController</code>, <code>UserController</code>, <code>PosController</code>, dan Blade ter-render tanpa cache lama:</p>
+                        <div class="cmd-box">
+                            <span id="cmd_optimize">php artisan optimize:clear</span>
+                            <button class="btn-copy" onclick="copyText('cmd_optimize', this)">Salin Perintah</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_4">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_4">4. Verifikasi Halaman Login &amp; Footer Branding Universitas Terbuka</label>
+                        <p class="text-muted small mb-0">Buka browser pada rasio zoom <strong>100%</strong>. Pastikan kartu login tampil rapi dan di bagian bawahnya muncul <strong>Logo UT + © 2026 Cantika POS - Capstone Project | Program Studi Sistem Informasi | Universitas Terbuka</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAHAP 2: LOGIN OWNER & IMPORT CSV -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <span>TAHAP 2: Login Owner, Konfigurasi Toko &amp; Import 386 Barang CSV</span>
+                <span class="badge-step">Langkah 5 - 8</span>
+            </div>
+            <div>
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_5">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_5">5. Login Pertama sebagai Owner &amp; Cek Footer Sidebar Dashboard</label>
+                        <p class="text-muted small mb-2">Masuk menggunakan username <code>owner</code> dan password <code>password123</code>. Pastikan Dashboard tampil dengan seluruh metrik bernilai <strong>Rp 0 / 0 Faktur</strong> dan di pojok kiri bawah Sidebar tertanam Footer Logo UT.</p>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_owner_user" value="owner" placeholder="Username Owner">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_owner_pass" value="password123" placeholder="Password Owner">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_owner_pin" value="000000" placeholder="PIN 6 Digit Owner">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_6">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_6">6. Verifikasi Modal Identitas Toko (🏪 Profil Toko)</label>
+                        <p class="text-muted small mb-2">Klik tombol <strong>🏪 Profil Toko</strong> di pojok kanan atas. Pastikan nama toko <code>CANTIKA AKSESORIS</code>, alamat, nomor layanan komplain <code>+6281234567890</code>, dan catatan kaki struk sudah terisi otomatis dari seeder.</p>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_7">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_7">7. Import File Katalog <code>import_barang_cantika_numeric.csv</code></label>
+                        <p class="text-muted small mb-2">Buka menu <strong>📦 Katalog &amp; Stok &rarr; Data Barang</strong>. Unggah/Import file <code>import_barang_cantika_numeric.csv</code>. Pastikan seluruh <strong>386 produk</strong> berhasil masuk (Kabel, Voucher Fisik, Audio, Casing, Pulsa Prabayar, Token PLN, Tagihan PPOB Pascabayar, dan Jasa Servis).</p>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_jml_produk" placeholder="Catat jumlah produk terimport (Target: 386 produk)">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_catatan_csv" placeholder="Catatan status import CSV (misal: Sukses 100%)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_8">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_8">8. Buat Data Master Pendukung (1 Supplier, 1 Pelanggan Member, &amp; 1 Promo Voucher)</label>
+                        <p class="text-muted small mb-2">Agar pengujian semua role berjalan mulus, siapkan minimal 1 data pada masing-masing menu di bawah ini:</p>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_supplier" placeholder="Nama Supplier (misal: PT Mitra Aksesoris)">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_member" placeholder="Pelanggan Member (misal: Rina Member)">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm saved-input" id="inp_voucher" placeholder="Kode Voucher Uji (misal: HEMAT5000)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAHAP 3: PEMBUATAN AKUN ROLE STAF -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <span>TAHAP 3: Pembuatan Akun Staf (Supervisor, Admin Gudang, &amp; Kasir)</span>
+                <span class="badge-step">Langkah 9 - 11</span>
+            </div>
+            <div>
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_9">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_9">9. Buat Akun SUPERVISOR di Menu Kelola Staf</label>
+                        <p class="text-muted small mb-2">Buka <strong>💼 Laporan &amp; Akses &rarr; Kelola Staf &rarr; + Tambah Staf Baru</strong>. Pilih Role <strong>Supervisor</strong>, lalu klik tombol <strong>⚡ Buat Semua Otomatis</strong> (atau isi manual) dan catat kredensialnya di bawah ini:</p>
+                        <div class="row g-2">
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input" id="spv_name" placeholder="Nama SPV (misal: Budi SPV)"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="spv_user" placeholder="Username (staff_supervisor_xxxx)"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="spv_pass" placeholder="Password (@Staff_supervisor_xxxx)"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace fw-bold text-danger" id="spv_pin" placeholder="PIN 6 Digit SPV"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_10">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_10">10. Buat Akun ADMIN GUDANG di Menu Kelola Staf</label>
+                        <p class="text-muted small mb-2">Klik <strong>+ Tambah Staf Baru</strong>, pilih Role <strong>Admin Gudang</strong>, klik <strong>⚡ Buat Semua Otomatis</strong>, simpan dan catat kredensialnya:</p>
+                        <div class="row g-2">
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input" id="adm_name" placeholder="Nama Admin (misal: Andi Gudang)"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="adm_user" placeholder="Username (staff_admin_xxxx)"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="adm_pass" placeholder="Password (@Staff_admin_xxxx)"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="adm_pin" placeholder="PIN 6 Digit Admin"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_11">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_11">11. Buat Akun KASIR (Bisa 1 atau 2 Akun Kasir untuk Simulasi Meja Ganda)</label>
+                        <p class="text-muted small mb-2">Klik <strong>+ Tambah Staf Baru</strong>, pilih Role <strong>Kasir</strong>, klik <strong>⚡ Buat Semua Otomatis</strong>, simpan dan catat kredensialnya:</p>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input" id="ksr1_name" placeholder="Nama Kasir 1 (misal: Dias Kasir)"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="ksr1_user" placeholder="Username Kasir 1"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="ksr1_pass" placeholder="Password Kasir 1"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="ksr1_pin" placeholder="PIN 6 Digit Kasir 1"></div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input" id="ksr2_name" placeholder="Nama Kasir 2 (Opsional)"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="ksr2_user" placeholder="Username Kasir 2"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="ksr2_pass" placeholder="Password Kasir 2"></div>
+                            <div class="col-md-3"><input type="text" class="form-control form-control-sm saved-input font-monospace" id="ksr2_pin" placeholder="PIN 6 Digit Kasir 2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAHAP 4: SMOKE TEST LAYAR KASIR, KEAMANAN & AUDIT TRAIL -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <span>TAHAP 4: Verifikasi Akhir (Smoke Test) UI Kasir, Void Total, Anti-Dual Login &amp; Audit</span>
+                <span class="badge-step">Langkah 12 - 16</span>
+            </div>
+            <div>
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_12">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_12">12. Uji Tampilan Layar Kasir Fullscreen (Tanpa Scroll Global) &amp; Kapsul Logo UT</label>
+                        <p class="text-muted small mb-1">Login menggunakan akun Kasir 1, masukkan modal awal shift (misal <code>100000</code>). Pastikan pada zoom 100%:</p>
+                        <ul class="small text-muted mb-0">
+                            <li>Tombol <strong>PROSES BAYAR [F5]</strong> di kanan bawah terlihat utuh tanpa perlu scroll layar utama.</li>
+                            <li>Saat memasukkan &gt;10 jenis barang (misal barcode <code>10100001</code> s/d <code>10100012</code>), hanya <strong>tabel keranjang kiri</strong> yang memiliki scrollbar layaknya iframe.</li>
+                            <li>Di pojok kanan bawah pita hitam, Logo UT &amp; teks copyright tampil jelas di dalam kapsul putih transparan.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_13">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_13">13. Uji Otorisasi [KLIK X] Void 1 Item &amp; [F6] Void Total</label>
+                        <p class="text-muted small mb-1">Masukkan beberapa barang ke keranjang (contoh: <code>10100001</code> Kabel U2M Vivan &amp; <code>10100002</code> Kabel U2M Robot). Klik tombol merah <strong>x</strong> pada salah satu item, masukkan PIN SPV/Owner. Setelah terhapus, tekan <strong>[F6] VOID TOTAL</strong> dan masukkan PIN SPV/Owner untuk memastikan keranjang bersih kembali ke Rp 0.</p>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_14">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_14">14. Uji Proteksi Anti-Dual Login &amp; Bypass PIN Darurat (Zombie Session)</label>
+                        <p class="text-muted small mb-1">Biarkan Kasir 1 tetap login di Browser A. Buka Browser B (atau Mode Incognito) lalu coba login dengan akun Kasir 1:</p>
+                        <ul class="small text-muted mb-0">
+                            <li>Pastikan login <strong>ditolak</strong> dengan peringatan sesi masih aktif dan muncul kotak merah input <strong>PIN Supervisor / Owner (6 Digit)</strong>.</li>
+                            <li>Masukkan PIN Supervisor/Owner beserta password Kasir 1, klik MASUK. Pastikan sesi di Browser A otomatis terputus dan Browser B berhasil masuk.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_15">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_15">15. Verifikasi Kelengkapan Rekaman di Menu Log Aktivitas (Audit Trail)</label>
+                        <p class="text-muted small mb-1">Login kembali sebagai Owner/Supervisor, buka <strong>💼 Laporan &amp; Akses &rarr; Log Aktivitas</strong>. Pastikan format log terbaru sudah tampil lengkap dengan <em>Nama Barang</em>, <em>Nama &amp; Username Otorisator</em>, serta <em>Role</em>:</p>
+                        <div class="p-2 rounded bg-light border font-monospace small text-dark">
+                            &bull; "Penghapusan Kabel U2M Vivan pada keranjang kasir disetujui oleh Budi (staff_supervisor_xxxx) selaku supervisor."<br>
+                            &bull; "Sesi tersangkut dibuka paksa menggunakan otorisasi PIN Pemilik Toko (owner) selaku owner."
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-row d-flex gap-3 align-items-start">
+                    <input class="form-check-input task-check" type="checkbox" id="gb_step_16">
+                    <div class="w-100">
+                        <label class="fw-bold task-title d-block cursor-pointer" for="gb_step_16">16. Backup Database (.sql) Titik Siap Uji (Golden Backup)</label>
+                        <p class="text-muted small mb-2">Setelah 386 barang CSV dan seluruh akun staf siap, buka <strong>Dashboard Owner</strong> lalu klik tombol <strong>💾 Backup Database (.sql)</strong> di kanan atas. Simpan file SQL tersebut agar kapan pun kamu selesai demo dengan teman-teman, kamu bisa langsung mengembalikan kondisi siap uji tanpa perlu import ulang!</p>
+                        <input type="text" class="form-control form-control-sm saved-input" id="inp_nama_backup" placeholder="Catat nama file backup .sql (misal: backup_cantika_pos_golden_20261029.sql)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function updateProgress() {
+            const checks = document.querySelectorAll('.task-check');
+            let done = 0;
+            checks.forEach(c => {
+                const row = c.closest('.task-row');
+                if (c.checked) {
+                    done++;
+                    if (row) row.classList.add('completed');
+                } else {
+                    if (row) row.classList.remove('completed');
+                }
+            });
+            const total = checks.length;
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('progressText').innerText = `${done} / ${total} Langkah Selesai (${pct}%)`;
+        }
+
+        function copyText(elementId, btn) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const old = btn.innerText;
+                btn.innerText = '✅ Tersalin!';
+                setTimeout(() => btn.innerText = old, 1500);
+            });
+        }
+
+        function resetAllProgress() {
+            if (!confirm('Hapus semua centang dan catatan input pada lembar Gladi Bersih ini?')) return;
+            document.querySelectorAll('.task-check').forEach(c => {
+                c.checked = false;
+                localStorage.removeItem('cantika_gb_' + c.id);
+            });
+            document.querySelectorAll('.saved-input').forEach(inp => {
+                if (!['inp_owner_user', 'inp_owner_pass', 'inp_owner_pin'].includes(inp.id)) {
+                    inp.value = '';
+                }
+                localStorage.removeItem('cantika_gb_' + inp.id);
+            });
+            updateProgress();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.task-check').forEach(c => {
+                const saved = localStorage.getItem('cantika_gb_' + c.id);
+                if (saved === 'true') c.checked = true;
+                c.addEventListener('change', () => {
+                    localStorage.setItem('cantika_gb_' + c.id, c.checked);
+                    updateProgress();
+                });
+            });
+
+            document.querySelectorAll('.saved-input').forEach(inp => {
+                const saved = localStorage.getItem('cantika_gb_' + inp.id);
+                if (saved !== null) inp.value = saved;
+                inp.addEventListener('input', () => {
+                    localStorage.setItem('cantika_gb_' + inp.id, inp.value);
+                });
+            });
+
+            updateProgress();
+        });
+    </script>
+</body>
+</html>

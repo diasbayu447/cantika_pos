@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skenario Pengujian Semua Role (UAT) - Cantika POS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #d17885;
+            --primary-light: #fdf2f4;
+            --primary-dark: #b55d6a;
+        }
+        body {
+            background-color: #f7f4f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            padding-bottom: 60px;
+        }
+        .hero-header {
+            background: linear-gradient(135deg, #2c2c2c 0%, #4a3538 50%, #d17885 100%);
+            color: white;
+            padding: 32px 24px;
+            border-bottom: 4px solid #ffcc00;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .sticky-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e5e5e5;
+            padding: 12px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+        .role-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+            margin-bottom: 28px;
+            overflow: hidden;
+        }
+        .role-header-owner {
+            background: linear-gradient(90deg, #dc3545, #b02a37);
+            color: white;
+            padding: 16px 24px;
+        }
+        .role-header-spv {
+            background: linear-gradient(90deg, #0d6efd, #0a58ca);
+            color: white;
+            padding: 16px 24px;
+        }
+        .role-header-admin {
+            background: linear-gradient(90deg, #0dcaf0, #0aa2c0);
+            color: #111;
+            padding: 16px 24px;
+        }
+        .role-header-cashier {
+            background: linear-gradient(90deg, #198754, #146c43);
+            color: white;
+            padding: 16px 24px;
+        }
+        .scenario-item {
+            padding: 18px 22px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        .scenario-item:last-child {
+            border-bottom: none;
+        }
+        .scenario-item.completed {
+            background-color: #f3faf5;
+        }
+        .scenario-item.completed .scenario-title {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .form-check-input.uat-check {
+            width: 1.45em;
+            height: 1.45em;
+            margin-top: 0.15em;
+            cursor: pointer;
+            border: 2px solid #888;
+        }
+        .form-check-input.uat-check:checked {
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .barcode-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-family: monospace;
+            font-size: 12.5px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .barcode-pill:hover {
+            background-color: #fdf2f4;
+            border-color: #d17885;
+        }
+        .filter-btn.active {
+            background-color: #2c2c2c !important;
+            color: #fff !important;
+            border-color: #2c2c2c !important;
+        }
+        .uat-input {
+            font-size: 13px;
+            border-radius: 8px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .role-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HERO HEADER -->
+    <div class="hero-header">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <span class="badge bg-warning text-dark fw-bold mb-2">USER ACCEPTANCE TEST (UAT) &amp; SIMULASI MULTI-ROLE</span>
+                    <h2 class="fw-bold m-0">👥 Skenario Pengujian Wewenang Setiap Role — Cantika POS</h2>
+                    <p class="m-0 mt-1 opacity-90">Panduan Interaktif untuk Rekan Penguji (Owner, Supervisor, Admin Gudang, &amp; Kasir)</p>
+                </div>
+                <div class="d-flex gap-2 no-print">
+                    <button class="btn btn-light fw-bold shadow-sm" onclick="window.print()">🖨️ Cetak Hasil UAT</button>
+                    <button class="btn btn-outline-light fw-bold" onclick="resetUat()">🔄 Reset Skenario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STICKY FILTER & PROGRESS BAR -->
+    <div class="sticky-bar no-print">
+        <div class="container">
+            <div class="row g-2 align-items-center">
+                <div class="col-lg-6">
+                    <div class="d-flex flex-wrap gap-1">
+                        <button class="btn btn-sm btn-outline-dark fw-bold filter-btn active" onclick="filterRole('all', this)">🌐 Semua Role (24 Skenario)</button>
+                        <button class="btn btn-sm btn-outline-danger fw-bold filter-btn" onclick="filterRole('owner', this)">👑 Owner (6)</button>
+                        <button class="btn btn-sm btn-outline-primary fw-bold filter-btn" onclick="filterRole('supervisor', this)">🛡️ Supervisor (5)</button>
+                        <button class="btn btn-sm btn-outline-info text-dark fw-bold filter-btn" onclick="filterRole('admin', this)">📦 Admin Gudang (5)</button>
+                        <button class="btn btn-sm btn-outline-success fw-bold filter-btn" onclick="filterRole('cashier', this)">🛒 Kasir POS (8)</button>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold small">Progress Pengujian Tim:</span>
+                        <span class="fw-bold small text-success" id="uatProgressText">0 / 24 Skenario Selesai (0%)</span>
+                    </div>
+                    <div class="progress" style="height: 8px; border-radius: 8px;">
+                        <div class="progress-bar bg-success" id="uatProgressBar" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+
+        <!-- 1. PANEL KREDENSIAL & CONTEK BARCODE CSV -->
+        <div class="role-card">
+            <div class="p-3 bg-dark text-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">🔑 Papan Kredensial Tim Penguji &amp; Contekan Barcode CSV (Klik Barcode untuk Copy)</span>
+                <span class="badge bg-warning text-dark">Isi Sebelum Mulai</span>
+            </div>
+            <div class="p-4">
+                <!-- Tabel Input Kredensial masing-masing Role -->
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered align-middle mb-0" style="font-size: 13px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="16%">Role / Jabatan</th>
+                                <th width="22%">Nama Penguji (Teman)</th>
+                                <th width="22%">Username Login</th>
+                                <th width="22%">Password Login</th>
+                                <th width="18%">PIN 6 Digit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-danger">👑 OWNER</span></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input" id="cred_owner_tester" placeholder="Nama teman penguji Owner"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace fw-bold" id="cred_owner_user" value="owner"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace" id="cred_owner_pass" value="password123"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace fw-bold text-danger" id="cred_owner_pin" value="000000"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-primary">🛡️ SUPERVISOR</span></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input" id="cred_spv_tester" placeholder="Nama teman penguji SPV"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace fw-bold" id="cred_spv_user" placeholder="staff_supervisor_xxxx"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace" id="cred_spv_pass" placeholder="@Staff_supervisor_xxxx"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace fw-bold text-primary" id="cred_spv_pin" placeholder="6 Digit PIN SPV"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-info text-dark">📦 ADMIN GUDANG</span></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input" id="cred_adm_tester" placeholder="Nama teman penguji Admin"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace fw-bold" id="cred_adm_user" placeholder="staff_admin_xxxx"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace" id="cred_adm_pass" placeholder="@Staff_admin_xxxx"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace fw-bold" id="cred_adm_pin" placeholder="6 Digit PIN Admin"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-success">🛒 KASIR POS</span></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input" id="cred_ksr_tester" placeholder="Nama teman penguji Kasir"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace fw-bold" id="cred_ksr_user" placeholder="staff_cashier_xxxx"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace" id="cred_ksr_pass" placeholder="@Staff_cashier_xxxx"></td>
+                                <td><input type="text" class="form-control form-control-sm uat-input font-monospace fw-bold text-success" id="cred_ksr_pin" placeholder="6 Digit PIN Kasir"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Cheat Sheet Barcode dari CSV -->
+                <div class="p-3 rounded bg-light border">
+                    <div class="fw-bold small text-dark mb-2">🏷️ Contekan Cepat Barcode dari <code>import_barang_cantika_numeric.csv</code> (Klik untuk Copy ke Clipboard):</div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="barcode-pill" onclick="copyDirect('10100001', this)">📋 <strong>10100001</strong> (Kabel U2M Vivan - Rp18.000 | Grosir ≥20: Rp16.000)</span>
+                        <span class="barcode-pill" onclick="copyDirect('10100010', this)">📋 <strong>10100010</strong> (Kabel U2L Robot - Rp30.000 | Grosir ≥20: Rp27.000)</span>
+                        <span class="barcode-pill" onclick="copyDirect('10200001', this)">📋 <strong>10200001</strong> (Voucher Telkomsel 1GB 1D - Rp6.500 | Grosir ≥10: Rp5.000)</span>
+                        <span class="barcode-pill" onclick="copyDirect('10300003', this)">📋 <strong>10300003</strong> (Casing Samsung A15 - Rp11.000 | Stok: 100)</span>
+                        <span class="barcode-pill" onclick="copyDirect('20100002', this)">📋 <strong>20100002</strong> (Pulsa Telkomsel 10K [Prabayar] - Rp13.000)</span>
+                        <span class="barcode-pill" onclick="copyDirect('20200001', this)">📋 <strong>20200001</strong> (Token Listrik 20K [Prabayar] - Rp23.000)</span>
+                        <span class="barcode-pill" onclick="copyDirect('20300001', this)">📋 <strong>20300001</strong> (Tagihan PLN [Pascabayar] - Admin Rp3.000)</span>
+                        <span class="barcode-pill" onclick="copyDirect('30100002', this)">📋 <strong>30100002</strong> (Service LCD [Jasa Servis] - Harga Fleksibel Rp200.000)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- ROLE 1: OWNER (PEMILIK TOKO)                                      -->
+        <!-- ================================================================= -->
+        <div class="role-card role-section" data-role="owner">
+            <div class="role-header-owner d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold m-0">👑 ROLE 1: OWNER (Pemilik Toko)</h5>
+                    <small class="opacity-90">Otoritas Tertinggi: Pengaturan Identitas Toko, Manajemen Semua Staf, Audit Trail &amp; Rollback, Laporan Laba Rugi, &amp; Backup DB</small>
+                </div>
+                <span class="badge bg-light text-danger fw-bold">6 Wewenang Utama</span>
+            </div>
+            <div>
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_own_1">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_own_1">O-1. Konfigurasi Identitas Toko &amp; Struk (Fitur Eksklusif Owner)</label>
+                        <p class="text-muted small mb-2">Klik tombol <strong>🏪 Profil Toko</strong> di navbar kanan atas (tombol ini tidak dimiliki role lain). Ubah nomor WA layanan komplain atau catatan kaki struk, lalu klik Simpan. Pastikan muncul notifikasi berhasil dan tercatat di Log Aktivitas.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_own_1" placeholder="Catatan hasil uji Penguji Owner (misal: Footer struk berhasil diubah)">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_own_2">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_own_2">O-2. Manajemen Staf &amp; Generator Kredensial Otomatis</label>
+                        <p class="text-muted small mb-2">Buka <strong>💼 Laporan &amp; Akses &rarr; Kelola Staf</strong>. Coba fitur <strong>+ Tambah Staf Baru &rarr; ⚡ Buat Semua Otomatis</strong> (membuat Username angka unik, Password kuat dengan indikator bar hijau, dan PIN 6 digit unik). Coba juga mengedit status akun staf menjadi <em>Nonaktif (Diblokir)</em> lalu aktifkan kembali.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_own_2" placeholder="Catatan hasil uji pembuatan/edit staf">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_own_3">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_own_3">O-3. Wewenang Memutus Paksa Sesi (🛑 Kick Session) Semua Bawahan</label>
+                        <p class="text-muted small mb-2">Saat teman yang memegang akun <strong>Supervisor, Admin, atau Kasir</strong> sedang berstatus <span class="badge bg-success">🟢 Online</span> di tabel Kelola Staf, klik tombol <strong>🛑 Kick</strong> pada salah satu akun mereka. Pastikan sesi mereka langsung terputus saat mereka mengklik menu apa pun!</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_own_3" placeholder="Catat akun siapa yang berhasil di-kick oleh Owner">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_own_4">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_own_4">O-4. Otorisasi PIN Tertinggi (Force Login, Buka Layar Terkunci, &amp; Void Kasir)</label>
+                        <p class="text-muted small mb-2">Gunakan PIN 6 digit Owner (<code>000000</code>) untuk: (1) Membuka sesi kasir/SPV yang tersangkut di halaman Login, (2) Membuka paksa layar <em>Lockscreen</em> milik staf lain, dan (3) Menyetujui penghapusan barang di meja kasir.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_own_4" placeholder="Catatan hasil uji otorisasi PIN Owner">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_own_5">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_own_5">O-5. Evaluasi Laporan Keuangan, Analitik Histogram 24 Jam &amp; Audit Trail</label>
+                        <p class="text-muted small mb-2">Buka menu <strong>Laporan Keuangan</strong> (cek Laba Kotor = Omzet - HPP), <strong>Analitik Toko</strong> (cek grafik jam sibuk 24 jam &amp; produk terlaris), serta <strong>Log Aktivitas</strong> untuk mengaudit seluruh tindakan staf beserta tombol <em>Rollback</em>.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_own_5" placeholder="Catatan temuan di Laporan Keuangan / Analitik / Log Aktivitas">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_own_6">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_own_6">O-6. Pencadangan Basis Data Instan (💾 Backup Database .sql)</label>
+                        <p class="text-muted small mb-2">Buka <strong>📊 Dashboard</strong>, lalu klik tombol <strong>💾 Backup Database (.sql)</strong> di sebelah kanan atas. Pastikan browser langsung mengunduh file dump SQL database Cantika POS.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_own_6" placeholder="Catatan hasil unduh backup SQL">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- ROLE 2: SUPERVISOR                                                -->
+        <!-- ================================================================= -->
+        <div class="role-card role-section" data-role="supervisor">
+            <div class="role-header-spv d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold m-0">🛡️ ROLE 2: SUPERVISOR (Pengawas Operasional)</h5>
+                    <small class="opacity-90">Otorisator Lapangan: Persetujuan PIN Void &amp; Force Login, Manajemen Diskon/Promo, Biaya Operasional, &amp; Pengawasan Kasir/Admin</small>
+                </div>
+                <span class="badge bg-light text-primary fw-bold">5 Wewenang &amp; Batasan</span>
+            </div>
+            <div>
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_spv_1">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_spv_1">S-1. Uji Proteksi Hierarki Staf (Supervisor vs Owner &amp; Bawahan)</label>
+                        <p class="text-muted small mb-2">Login sebagai <strong>Supervisor</strong> lalu buka menu <strong>Kelola Staf</strong>. Lakukan 3 pembuktian keamanan ini:</p>
+                        <ul class="small text-muted mb-2">
+                            <li>Coba edit akun <strong>Owner</strong> atau ubah role staf menjadi Owner &rarr; Pastikan sistem <strong>menolak dengan pesan error proteksi hierarki</strong>.</li>
+                            <li>Lihat kolom Aksi pada baris Owner atau sesama Supervisor &rarr; Pastikan tombol <strong>🛑 Kick</strong> dan <strong>🗑️ Hapus</strong> tidak muncul pada akun Owner.</li>
+                            <li>Klik tombol <strong>🛑 Kick</strong> pada akun <strong>Kasir</strong> atau <strong>Admin Gudang</strong> yang sedang Online &rarr; Pastikan berhasil memutus sesi mereka!</li>
+                        </ul>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_spv_1" placeholder="Catatan hasil uji hierarki Supervisor">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_spv_2">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_spv_2">S-2. Pembuatan Program Diskon (Cuci Gudang, Promo Periode, &amp; Voucher)</label>
+                        <p class="text-muted small mb-2">Buka <strong>📦 Katalog &amp; Stok &rarr; Manajemen Diskon</strong>. Buat: (1) Diskon Produk (Cuci Gudang) untuk barang tertentu, atau (2) Voucher Diskon dengan kode unik agar bisa diuji langsung oleh teman yang bertugas sebagai Kasir.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_spv_2" placeholder="Catat nama promo atau kode voucher yang dibuat SPV">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_spv_3">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_spv_3">S-3. Otorisasi PIN Lapangan: Void 1 Barang ([KLIK X]) &amp; Void Total ([F6]) di Meja Kasir</label>
+                        <p class="text-muted small mb-2">Saat teman <strong>Kasir</strong> ingin membatalkan 1 barang atau mengosongkan seluruh keranjang (<code>[F6] VOID TOTAL</code>), masukkan <strong>PIN 6 Digit Supervisor</strong> pada modal otorisasi di layar kasir. Pastikan barang terhapus dan nama serta username Supervisor tercatat di <em>Log Aktivitas</em>.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_spv_3" placeholder="Catatan hasil otorisasi Void oleh SPV">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_spv_4">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_spv_4">S-4. Otorisasi PIN Darurat: Membuka Sesi Nyangkut (Force Login) &amp; Lockscreen Kasir</label>
+                        <p class="text-muted small mb-2">Saat teman Kasir atau Admin terkunci karena membuka browser baru tanpa logout (<em>Zombie Session</em>), berikan <strong>PIN 6 Digit Supervisor</strong> pada kolom merah di halaman Login. Uji juga membuka layar <em>Lockscreen</em> milik Kasir menggunakan PIN Supervisor.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_spv_4" placeholder="Catatan hasil bypass Force Login & Lockscreen oleh SPV">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_spv_5">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_spv_5">S-5. Pencatatan Biaya Operasional Toko &amp; Pemeriksaan Log Aktivitas</label>
+                        <p class="text-muted small mb-2">Buka <strong>💼 Laporan &amp; Akses &rarr; Biaya Operasional</strong>, tambahkan pengeluaran toko (misal: <em>Bayar Tagihan Internet / Listrik Toko Rp 150.000</em>). Selanjutnya buka <strong>Log Aktivitas</strong> untuk memverifikasi semua aktivitas kasir dan gudang.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_spv_5" placeholder="Catatan input biaya operasional & pemeriksaan log">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- ROLE 3: ADMIN GUDANG                                              -->
+        <!-- ================================================================= -->
+        <div class="role-card role-section" data-role="admin">
+            <div class="role-header-admin d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold m-0">📦 ROLE 3: ADMIN GUDANG (Inventori &amp; Pengadaan)</h5>
+                    <small>Fokus Rantai Pasok: Katalog Produk, Cetak Barcode Rak, Kulakan Tunai/Tempo, Hutang Supplier, Retur, &amp; Stock Opname</small>
+                </div>
+                <span class="badge bg-dark text-info fw-bold">5 Wewenang &amp; Batasan</span>
+            </div>
+            <div>
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_adm_1">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_adm_1">A-1. Manajemen Data Barang, Lokasi Rak &amp; Cetak Barcode Rak</label>
+                        <p class="text-muted small mb-2">Login sebagai <strong>Admin Gudang</strong>. Buka <strong>📦 Katalog &amp; Stok &rarr; Data Barang</strong>, cari produk <code>10100001</code> (Kabel U2M Vivan) atau tambahkan 1 barang baru. Lalu buka menu <strong>Cetak Barcode Rak</strong> untuk menguji fitur pembuatan label harga/barcode etalase.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_adm_1" placeholder="Catatan hasil tambah/edit barang & cetak barcode rak">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_adm_2">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_adm_2">A-2. Transaksi Kulakan (Barang Masuk) Tunai &amp; Hutang Tempo</label>
+                        <p class="text-muted small mb-2">Buka <strong>📥 Pengadaan &amp; Retur &rarr; Kulakan (Masuk)</strong>. Buat transaksi pembelian stok dari Supplier untuk produk <code>10300003</code> (Casing Transparan Samsung A15) sebanyak <strong>20 pcs</strong> dengan metode <strong>Hutang Tempo</strong>. Pastikan stok barang bertambah dari 100 menjadi 120!</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_adm_2" placeholder="Catat nomor faktur kulakan & perubahan stok">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_adm_3">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_adm_3">A-3. Pemantauan &amp; Pelunasan Hutang Tempo Supplier</label>
+                        <p class="text-muted small mb-2">Buka <strong>📥 Pengadaan &amp; Retur &rarr; Hutang Tempo</strong>. Temukan tagihan kulakan tempo yang baru saja dibuat pada skenario A-2, lalu lakukan aksi pembayaran/pelunasan hutang.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_adm_3" placeholder="Catatan status pelunasan hutang tempo">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_adm_4">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_adm_4">A-4. Retur Barang Cacat &amp; Penyesuaian Stok Fisik (Stock Opname)</label>
+                        <p class="text-muted small mb-2">Buka menu <strong>Retur Barang</strong> untuk menguji pengembalian barang rusak, kemudian buka menu <strong>Stock Opname</strong> dan lakukan penyesuaian jumlah stok fisik pada salah satu barang disertai alasan (misal: <em>Selisih hitung etalase</em>). Pastikan stok ter-update akurat.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_adm_4" placeholder="Catatan hasil uji Retur & Stock Opname">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_adm_5">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_adm_5">A-5. Uji Pembatasan Hak Akses (RBAC) Admin Gudang</label>
+                        <p class="text-muted small mb-2">Buktikan bahwa Admin Gudang memiliki pembatasan ketat:</p>
+                        <ul class="small text-muted mb-2">
+                            <li>Perhatikan Sidebar Kiri &rarr; Grup menu <strong>💼 Laporan &amp; Akses</strong> (Laporan Keuangan, Analitik, Log Aktivitas, Kelola Staf) <strong>tidak muncul</strong>.</li>
+                            <li>Coba ketik paksa URL <code>/users</code> atau <code>/reports</code> di browser &rarr; Sistem menolak akses.</li>
+                            <li>Coba gunakan PIN 6 Digit milik Admin Gudang untuk melakukan Void barang di layar Kasir &rarr; Sistem menolak dengan pesan <em>"PIN salah atau Anda tidak memiliki akses otorisasi!"</em>.</li>
+                        </ul>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_adm_5" placeholder="Catatan bukti pembatasan akses Admin Gudang">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- ROLE 4: KASIR (POINT OF SALE)                                     -->
+        <!-- ================================================================= -->
+        <div class="role-card role-section" data-role="cashier">
+            <div class="role-header-cashier d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold m-0">🛒 ROLE 4: KASIR (Mesin Kasir / Point of Sale)</h5>
+                    <small class="opacity-90">Garda Depan Transaksi: Buka/Tutup Shift, 4 Tipe Produk (Fisik Ecer/Grosir, Prabayar, Pascabayar, Servis), Hold Antrean, Void, Struk &amp; WA</small>
+                </div>
+                <span class="badge bg-light text-success fw-bold">8 Skenario Lengkap</span>
+            </div>
+            <div>
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_ksr_1">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_ksr_1">K-1. Buka Shift Kasir (Modal Awal Laci) &amp; Kunci Anti-Back Browser</label>
+                        <p class="text-muted small mb-2">Login menggunakan akun <strong>Kasir</strong>. Masukkan Modal Awal Laci (misal: <code>200000</code>). Setelah masuk ke layar Mesin Kasir (POS), coba tekan tombol <strong>Back (&larr;)</strong> pada browser. Pastikan kasir tetap terkunci di layar POS dan tidak bisa keluar tanpa menutup shift!</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_ksr_1" placeholder="Catat nominal modal awal shift yang dimasukkan">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_ksr_2">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_ksr_2">K-2. Transaksi Produk Fisik: Eceran vs Harga Grosir Otomatis (Member ⭐)</label>
+                        <p class="text-muted small mb-2">Pastikan pelanggan di kanan atas masih <strong>Umum (Ecer)</strong>. Scan barcode <code>10200001</code> (Voucher Telkomsel 1GB 1D) lalu ubah Qty menjadi <strong>10</strong>:</p>
+                        <ul class="small text-muted mb-2">
+                            <li>Perhatikan munculnya banner kuning: <em>"💡 Info Grosir: Ubah pelanggan ke Member di kanan atas untuk mengaktifkan harga grosir!"</em> (Harga saat ini masih Eceran Rp 6.500 x 10 = Rp 65.000).</li>
+                            <li>Klik tombol <strong>+ Baru</strong> di sebelah dropdown Pelanggan, daftarkan member baru (misal: <em>Doni Konter</em>, WA: <code>81299887766</code>).</li>
+                            <li>Begitu pelanggan terpilih sebagai <strong>Member ⭐</strong>, pastikan label Ket berubah menjadi <span class="badge bg-success">GROSIR</span> dan harga otomatis turun menjadi <strong>Rp 5.000 x 10 = Rp 50.000</strong>!</li>
+                        </ul>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_ksr_2" placeholder="Catatan hasil uji perubahan harga Eceran ke Grosir">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_ksr_3">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_ksr_3">K-3. Transaksi Produk Digital Prabayar, Tagihan PPOB Pascabayar &amp; Jasa Servis</label>
+                        <p class="text-muted small mb-2">Di dalam keranjang kasir, uji keunikan 3 tipe produk non-fisik dari CSV kita:</p>
+                        <ul class="small text-muted mb-2">
+                            <li><strong>Digital Prabayar:</strong> Scan <code>20100002</code> (Pulsa Telkomsel 10K - Rp 13.000) &rarr; Isi kolom kuning <strong>No. Tujuan</strong> dengan <code>081234567890</code>.</li>
+                            <li><strong>Digital Pascabayar (PPOB):</strong> Scan <code>20300001</code> (Tagihan PLN) &rarr; Isi <strong>No. Tujuan</strong> dengan ID Pelanggan PLN, coba klik Bayar saat Tagihan masih kosong (sistem akan mencegah &amp; memberi peringatan!), lalu isi <strong>Tagihan</strong> sebesar <code>150000</code> dan <strong>Biaya Admin</strong> <code>3000</code> (Subtotal otomatis menjadi Rp 153.000).</li>
+                            <li><strong>Jasa Servis:</strong> Scan <code>30100002</code> (Service LCD) &rarr; Ubah harga di kolom Harga secara langsung (misal dari <code>200.000</code> menjadi <code>175.000</code> sesuai kesepakatan servis).</li>
+                        </ul>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_ksr_3" placeholder="Catatan hasil uji produk Prabayar, Pascabayar & Jasa Servis">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_ksr_4">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_ksr_4">K-4. Fitur [F4] Tahan Antrean (Hold Cart) &amp; Panggil Antrean (Recall)</label>
+                        <p class="text-muted small mb-2">Bayangkan pembeli sedang mengambil uang di ATM. Tekan tombol <strong>[F4] TAHAN</strong> di pita bawah untuk menyimpan keranjang saat ini ke daftar tunggu. Layar keranjang akan bersih untuk melayani pembeli berikutnya. Setelah itu, klik tombol <strong>📋 Lihat Antrean Tertahan</strong> di bawah Grand Total, lalu klik <strong>Panggil</strong> untuk mengembalikan seluruh belanjaan tadi ke keranjang!</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_ksr_4" placeholder="Catatan hasil uji Hold & Recall Antrean">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_ksr_5">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_ksr_5">K-5. Otorisasi Pembatalan: [KLIK X] Void 1 Barang &amp; [F6] Void Total</label>
+                        <p class="text-muted small mb-2">Uji prosedur keamanan pembatalan barang di meja kasir:</p>
+                        <ul class="small text-muted mb-2">
+                            <li>Klik tombol merah <strong>x</strong> pada salah satu baris barang &rarr; Muncul modal <strong>🛡️ Otorisasi Supervisor</strong>. Panggil teman pemegang role <strong>Supervisor / Owner</strong> untuk memasukkan PIN 6 digitnya hingga item tersebut terhapus.</li>
+                            <li>Masukkan lagi 2-3 barang sembarang, lalu tekan <strong>[F6] VOID TOTAL</strong> &rarr; Masukkan PIN Supervisor/Owner 1 kali untuk langsung mengosongkan seluruh isi keranjang kembali menjadi Rp 0.</li>
+                        </ul>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_ksr_5" placeholder="Catatan hasil uji Void 1 Item & Void Total">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_ksr_6">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_ksr_6">K-6. Pemakaian Voucher Diskon, Checkout Tunai &amp; QRIS [F5], Struk Thermal &amp; Kirim WA</label>
+                        <p class="text-muted small mb-2">Scan beberapa barang, masukkan kode kupon di kolom <strong>🎟️ Kupon Voucher Diskon</strong> lalu klik Pakai. Pilih metode pembayaran <strong>💵 Tunai</strong>, ketik nominal uang diterima, lalu klik <strong>PROSES BAYAR [F5]</strong>. Saat modal sukses muncul: uji tombol <strong>🖨️ Cetak Lagi</strong>, uji pengiriman <strong>💬 Kirim Struk Digital WA</strong>, lalu tekan <strong>[Enter]</strong> untuk transaksi baru dan uji tombol <strong>[F8] STRUK</strong> di pita bawah.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_ksr_6" placeholder="Catat Nomor Faktur (TRX-...) yang berhasil dibuat">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_ksr_7">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_ksr_7">K-7. Pencatatan Kas Keluar Laci (💸 Kas Keluar / Petty Cash)</label>
+                        <p class="text-muted small mb-2">Klik tombol <strong>💸 Kas Keluar</strong> di header kanan atas layar kasir. Masukkan nominal pengeluaran dadakan dari laci kasir (misal: <code>15000</code> untuk keterangan <em>Beli kantong plastik &amp; air galon</em>), lalu klik Simpan Pengeluaran.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_ksr_7" placeholder="Catatan input Kas Keluar (Petty Cash)">
+                    </div>
+                </div>
+
+                <div class="scenario-item d-flex gap-3 align-items-start">
+                    <input class="form-check-input uat-check" type="checkbox" id="uat_ksr_8">
+                    <div class="w-100">
+                        <label class="fw-bold scenario-title d-block cursor-pointer" for="uat_ksr_8">K-8. Simulasi Sesi Nyangkut (Anti-Dual Login) &amp; Tutup Shift Kasir</label>
+                        <p class="text-muted small mb-2">Pertama, coba login akun Kasir ini dari perangkat/browser kedua saat masih aktif &rarr; Buktikan akses ditolak dan wajib meminta PIN SPV/Owner. Terakhir, kembali ke layar kasir utama, klik tombol merah <strong>Tutup Kasir</strong> di pojok kanan atas, masukkan <strong>Total Uang Fisik Laci (Rp)</strong>, dan klik <strong>AKHIRI SHIFT &amp; LOGOUT</strong>.</p>
+                        <input type="text" class="form-control form-control-sm uat-input" id="note_ksr_8" placeholder="Catatan hasil penutupan shift & rekonsiliasi laci kasir">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function updateUatProgress() {
+            const checks = document.querySelectorAll('.uat-check');
+            let done = 0;
+            checks.forEach(c => {
+                const row = c.closest('.scenario-item');
+                if (c.checked) {
+                    done++;
+                    if (row) row.classList.add('completed');
+                } else {
+                    if (row) row.classList.remove('completed');
+                }
+            });
+            const total = checks.length;
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            document.getElementById('uatProgressBar').style.width = pct + '%';
+            document.getElementById('uatProgressText').innerText = `${done} / ${total} Skenario Selesai (${pct}%)`;
+        }
+
+        function filterRole(role, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.role-section').forEach(sec => {
+                if (role === 'all' || sec.getAttribute('data-role') === role) {
+                    sec.style.display = 'block';
+                } else {
+                    sec.style.display = 'none';
+                }
+            });
+        }
+
+        function copyDirect(code, el) {
+            navigator.clipboard.writeText(code).then(() => {
+                const origBg = el.style.backgroundColor;
+                el.style.backgroundColor = '#d1e7dd';
+                setTimeout(() => { el.style.backgroundColor = origBg; }, 800);
+            });
+        }
+
+        function resetUat() {
+            if (!confirm('Reset semua centang dan catatan pengujian UAT pada halaman ini?')) return;
+            document.querySelectorAll('.uat-check').forEach(c => {
+                c.checked = false;
+                localStorage.removeItem('cantika_uat_' + c.id);
+            });
+            document.querySelectorAll('.uat-input').forEach(inp => {
+                if (!['cred_owner_user', 'cred_owner_pass', 'cred_owner_pin'].includes(inp.id)) {
+                    inp.value = '';
+                }
+                localStorage.removeItem('cantika_uat_' + inp.id);
+            });
+            updateUatProgress();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.uat-check').forEach(c => {
+                const saved = localStorage.getItem('cantika_uat_' + c.id);
+                if (saved === 'true') c.checked = true;
+                c.addEventListener('change', () => {
+                    localStorage.setItem('cantika_uat_' + c.id, c.checked);
+                    updateUatProgress();
+                });
+            });
+
+            document.querySelectorAll('.uat-input').forEach(inp => {
+                const saved = localStorage.getItem('cantika_uat_' + inp.id);
+                if (saved !== null) inp.value = saved;
+                inp.addEventListener('input', () => {
+                    localStorage.setItem('cantika_uat_' + inp.id, inp.value);
+                });
+            });
+
+            updateUatProgress();
+        });
+    </script>
+</body>
+</html>

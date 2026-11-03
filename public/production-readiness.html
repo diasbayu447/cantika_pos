@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production, Hardware & Audit Checklist - Cantika POS</title>
+    <style>
+        @page { size: A4 landscape; margin: 12mm; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            font-size: 13px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px 30px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #198754;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #198754;
+            font-size: 22px;
+        }
+        .header p {
+            margin: 4px 0 0 0;
+            color: #666;
+            font-size: 12px;
+        }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 12px 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-card h3 { margin: 0; font-size: 22px; }
+        .stat-card span { font-size: 11px; color: #666; font-weight: bold; text-transform: uppercase; }
+        .progress-wrapper {
+            background: #e9ecef;
+            border-radius: 20px;
+            height: 12px;
+            width: 100%;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #0d6efd, #198754);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .btn-filter { background: #e9ecef; color: #333; }
+        .btn-filter.active { background: #198754; color: #fff; }
+        .btn-print { background: #2c3e50; color: #fff; }
+        .btn-reset { background: #dc3545; color: #fff; }
+        h2 {
+            background: #eefaf2;
+            color: #146c43;
+            padding: 10px 15px;
+            border-left: 5px solid #198754;
+            font-size: 15px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 9px 10px;
+            vertical-align: middle;
+            text-align: left;
+        }
+        th {
+            background: #f8f9fa;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #495057;
+        }
+        tr.row-checked { background-color: #f8fff9; }
+        tr.row-issue { background-color: #fff5f5 !important; }
+        .check-cell { width: 40px; text-align: center; }
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #198754;
+        }
+        .status-select {
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            font-weight: bold;
+            font-size: 12px;
+            width: 100%;
+            cursor: pointer;
+        }
+        .status-select.ready { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .status-select.issue { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .note-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+        .badge-code {
+            font-family: monospace;
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #0d6efd;
+        }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { box-shadow: none; max-width: 100%; padding: 0; }
+            .no-print { display: none !important; }
+            .note-input { border: none; background: transparent; }
+            .status-select { border: none; appearance: none; -webkit-appearance: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>🚀 PRODUCTION, HARDWARE & FINANCIAL AUDIT CHECKLIST</h1>
+            <p>Kesiapan Perangkat Keras Kasir, Audit Keseimbangan Matematika, Pemulihan Database & Go-Live — Cantika POS</p>
+        </div>
+        <div class="no-print" style="display:flex; gap:8px;">
+            <button class="btn btn-print" onclick="window.print()">🖨️ Cetak PDF Checklist</button>
+            <button class="btn btn-reset" onclick="resetAllData()">🗑️ Reset Checklist</button>
+        </div>
+    </div>
+
+    <!-- RINGKASAN PROGRES REAL-TIME -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <h3 id="totalTests">0</h3>
+            <span>Total Parameter Cek</span>
+        </div>
+        <div class="stat-card" style="border-bottom: 3px solid #0d6efd;">
+            <h3 id="checkedTests" style="color: #0d6efd;">0</h3>
+            <span>Sudah Diperiksa</span>
+        </div>
+        <div class="stat-card" style="border-bottom: 3px solid #198754;">
+            <h3 id="readyTests" style="color: #198754;">0</h3>
+            <span>Siap / Akurat (Ready)</span>
+        </div>
+        <div class="stat-card" style="border-bottom: 3px solid #dc3545;">
+            <h3 id="issueTests" style="color: #dc3545;">0</h3>
+            <span>Perlu Perbaikan (Issue)</span>
+        </div>
+    </div>
+
+    <div class="progress-wrapper">
+        <div class="progress-fill" id="progressBar"></div>
+    </div>
+
+    <!-- FILTER TOOLBAR -->
+    <div class="toolbar no-print">
+        <div style="display:flex; gap:6px;">
+            <button class="btn btn-filter active" onclick="filterRows('all', this)">Semua Item</button>
+            <button class="btn btn-filter" onclick="filterRows('unchecked', this)">⏳ Belum Dicek</button>
+            <button class="btn btn-filter" onclick="filterRows('ready', this)">✅ Siap (Ready)</button>
+            <button class="btn btn-filter" onclick="filterRows('issue', this)">⚠️ Perlu Perbaikan</button>
+        </div>
+        <small style="color:#666;">💾 <em>Progres otomatis tersimpan di penyimpanan lokal browser.</em></small>
+    </div>
+
+    <div id="checklistContainer"></div>
+</div>
+
+<script>
+    const prodSuites = [
+        {
+            category: "1. Integrasi Perangkat Keras Kasir (Hardware & Peripherals)",
+            items: [
+                { id: "hw_1", title: "Konfigurasi Printer Thermal 58mm", step: "Setel printer thermal (Blueprint/Epson) sebagai Default Printer di Windows, ukuran kertas 58mm, dan Margin = None.", expected: "Teks struk tercetak penuh dari tepi kiri ke kanan tanpa terpotong." },
+                { id: "hw_2", title: "Mode Silent Print Chrome (--kiosk-printing)", step: "Tambahkan parameter <span class='badge-code'>--kiosk-printing</span> pada shortcut Google Chrome di PC Kasir lalu uji tekan F5 (Proses Bayar).", expected: "Printer langsung mengeluarkan kertas struk seketika tanpa muncul jendela dialog Print." },
+                { id: "hw_3", title: "Uji Kecepatan Scan Barcode Fisik Beruntun", step: "Gunakan pistol Barcode Scanner USB untuk men-scan 5 barang berbeda secara cepat berturut-turut di layar POS.", expected: "Scanner otomatis mengirim karakter Enter (CR/LF), kolom pencarian bersih kembali, dan ke-5 barang masuk akurat." },
+                { id: "hw_4", title: "Uji Scan Label Barcode Hasil Cetak Sendiri", step: "Cetak 1 stiker barcode dari menu <span class='badge-code'>Cetak Barcode Rak</span>, lalu tembak stiker kertas tersebut menggunakan Barcode Scanner.", expected: "Garis Code128 hasil cetak terbaca tajam dan langsung dikenali di layar kasir." },
+                { id: "hw_5", title: "Pemicu Laci Kasir Otomatis (Cash Drawer RJ11)", step: "Colokkan kabel RJ11 dari laci uang ke port belakang Printer Thermal, atur 'Open Cash Drawer Before Printing' di Driver Printer.", expected: "Laci uang otomatis terbuka (terlontar) setiap kali struk pembayaran dicetak." }
+            ]
+        },
+        {
+            category: "2. Audit Rekonsiliasi Matematika Stok & Keuangan (Zero-Discrepancy)",
+            items: [
+                { id: "aud_1", title: "Rumus Keseimbangan Stok Fisik Akhir", step: "Ambil 1 sampel barang, hitung manual: <span class='badge-code'>Stok Awal + Kulakan - Terjual - Retur Tukar Barang - Retur ke Supplier +/- Opname</span>.", expected: "Angka stok di tabel Master Barang sama persis 100% dengan hitungan manual." },
+                { id: "aud_2", title: "Audit Keseimbangan Uang Tunai Laci (Shift)", step: "Hitung manual uang laci: <span class='badge-code'>Modal Awal Shift + Total Penjualan Cash (bukan QRIS) - Total Petty Cash</span>.", expected: "Angka 'Uang Sistem' pada saat Tutup Shift cocok 100% (Transaksi QRIS tidak ikut menambah uang tunai laci)." },
+                { id: "aud_3", title: "Audit Kalkulasi HPP & Laba Kotor", step: "Jual barang yang memiliki diskon Cuci Gudang atau Voucher. Cek di Laporan Keuangan: <span class='badge-code'>Laba Kotor = Omzet Bersih - (HPP x Qty Terjual)</span>.", expected: "Diskon memotong Omzet Bersih, sedangkan HPP tetap mengacu pada harga modal barang saat transaksi." },
+                { id: "aud_4", title: "Audit Kalkulasi Laba Bersih Riil (Net Profit)", step: "Pastikan di Laporan Keuangan berlaku rumus: <span class='badge-code'>Laba Bersih = Laba Kotor - Petty Cash Kasir - Biaya Operasional Toko</span>.", expected: "Seluruh pengeluaran kasir dan pengeluaran bulanan toko memotong Laba Bersih secara akurat." },
+                { id: "aud_5", title: "Audit Akumulasi & Penukaran Poin Member", step: "Member belanja Rp 120.000 (dapat 2 poin), lalu di transaksi kedua menukar 1 poin (potongan Rp 1.000) dan belanja Rp 50.000 (dapat 1 poin).", expected: "Saldo akhir poin member di database tepat berjumlah 2 poin (2 - 1 + 1 = 2)." }
+            ]
+        },
+        {
+            category: "3. Pemulihan Bencana Database & Keamanan Server (Disaster Recovery)",
+            items: [
+                { id: "dr_1", title: "Uji Restore File Backup (.sql) ke Database Kosong", step: "Unduh file <span class='badge-code'>.sql</span> dari tombol Backup Database di Dashboard. Buat database baru kosong di HeidiSQL/DBeaver lalu import file tersebut.", expected: "Seluruh struktur tabel dan isi transaksi berhasil di-restore tanpa error Foreign Key." },
+                { id: "dr_2", title: "Konfigurasi Keamanan .env Production", step: "Saat dipasang di PC Toko, ubah <span class='badge-code'>APP_ENV=production</span> dan <span class='badge-code'>APP_DEBUG=false</span> pada file <span class='badge-code'>.env</span>.", expected: "Jika terjadi kendala teknis, layar tidak menampilkan jejak kode rahasia server kepada kasir." },
+                { id: "dr_3", title: "Kapasitas Masa Aktif Sesi (Session Lifetime)", step: "Setel <span class='badge-code'>SESSION_LIFETIME=720</span> (12 jam) di file <span class='badge-code'>.env</span> agar sesi kasir tidak kedaluwarsa di tengah jam operasional toko.", expected: "Keamanan tetap dijaga oleh Lockscreen PIN 30 menit tanpa membuat token CSRF kadaluwarsa saat shift panjang." },
+                { id: "dr_4", title: "Auto-Start Server Laragon Saat PC Dinyalakan", step: "Centang opsi 'Run Laragon when Windows starts' dan 'Start All Services automatically' di pengaturan Laragon PC Kasir.", expected: "Saat komputer toko dinyalakan pagi hari, kasir tinggal membuka Chrome tanpa perlu menyalakan Apache/MySQL manual." }
+            ]
+        },
+        {
+            category: "4. Ketahanan Jaringan Lokal (LAN / Wi-Fi) & Akses Multi-Perangkat",
+            items: [
+                { id: "net_1", title: "Akses Dashboard Owner via Wi-Fi / Smartphone", step: "Cari IP lokal PC Kasir (misal <span class='badge-code'>192.168.1.10</span>), lalu buka alamat tersebut dari HP atau Laptop Owner yang terhubung di Wi-Fi toko yang sama.", expected: "Owner bisa memantau omzet Dashboard secara real-time dari ruang kerja atau HP sementara kasir melayani pembeli." },
+                { id: "net_2", title: "Simulasi Koneksi Internet Putus di Tengah Transaksi", step: "Matikan koneksi internet modem (namun Wi-Fi lokal/LAN tetap nyala), lalu lakukan transaksi kasir di PC lokal.", expected: "Transaksi lokal tetap berjalan dan tersimpan ke database MySQL lokal." }
+            ]
+        },
+        {
+            category: "5. Persiapan Go-Live Toko & Presentasi Sidang Capstone",
+            items: [
+                { id: "go_1", title: "Pembersihan Data Simulasi (Cutover Reset)", step: "Setelah semua pengujian selesai dan toko siap buka perdana, jalankan reset database bersih dan daftarkan hanya akun Owner asli.", expected: "Tabel transaksi, log, dan hutang bersih (mulai dari 0) siap menerima uang asli toko." },
+                { id: "go_2", title: "Penyusunan Data Seeder Khusus Demo Presentasi", step: "Siapkan 1 perintah seeder yang langsung mengisi data transaksi 7 hari ke belakang, barang kritis, dan barang mati.", expected: "Saat demo di depan dosen penguji, grafik tren Dashboard dan grafik Analitik langsung terlihat hidup dan penuh data." },
+                { id: "go_3", title: "Kesiapan 3 Browser Berbeda Saat Demo Sidang", step: "Siapkan Chrome (Login Owner), Edge/Firefox (Login Kasir), dan Mode Incognito (Login Supervisor) sebelum presentasi dimulai.", expected: "Bisa mendemokan fitur Kick Session, Buka Paksa Lockscreen, dan Void PIN secara langsung tanpa bolak-balik logout." }
+            ]
+        }
+    ];
+
+    const STORAGE_KEY = 'cantika_pos_prod_v1';
+    let savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+    function renderChecklist() {
+        const container = document.getElementById('checklistContainer');
+        let html = '';
+
+        prodSuites.forEach(suite => {
+            html += `<div class="suite-block"><h2>${suite.category}</h2>`;
+            html += `<table><thead><tr>
+                        <th class="check-cell">Cek</th>
+                        <th width="20%">Item Pemeriksaan</th>
+                        <th width="32%">Prosedur Verifikasi Lapangan</th>
+                        <th width="23%">Standar Kelulusan</th>
+                        <th width="10%">Status</th>
+                        <th width="15%">Catatan Teknis</th>
+                    </tr></thead><tbody>`;
+
+            suite.items.forEach(item => {
+                const state = savedState[item.id] || { checked: false, status: 'pending', note: '' };
+                const rowClass = state.status === 'issue' ? 'row-issue' : (state.checked ? 'row-checked' : '');
+                const selectClass = state.status === 'ready' ? 'ready' : (state.status === 'issue' ? 'issue' : '');
+
+                html += `
+                    <tr id="row_${item.id}" class="test-row ${rowClass}" data-status="${state.status}" data-checked="${state.checked}">
+                        <td class="check-cell">
+                            <input type="checkbox" ${state.checked ? 'checked' : ''} onchange="updateItem('${item.id}', 'checked', this.checked)">
+                        </td>
+                        <td><strong>${item.title}</strong></td>
+                        <td>${item.step}</td>
+                        <td><small>${item.expected}</small></td>
+                        <td>
+                            <select class="status-select ${selectClass}" onchange="updateItem('${item.id}', 'status', this.value)">
+                                <option value="pending" ${state.status === 'pending' ? 'selected' : ''}>⏳ Belum</option>
+                                <option value="ready" ${state.status === 'ready' ? 'selected' : ''}>✅ Siap</option>
+                                <option value="issue" ${state.status === 'issue' ? 'selected' : ''}>⚠️ Revisi</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="note-input" placeholder="Catatan konfigurasi..." value="${state.note.replace(/"/g, '&quot;')}" oninput="updateItem('${item.id}', 'note', this.value)">
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table></div>`;
+        });
+
+        container.innerHTML = html;
+        updateStats();
+    }
+
+    function updateItem(id, field, value) {
+        if (!savedState[id]) {
+            savedState[id] = { checked: false, status: 'pending', note: '' };
+        }
+        savedState[id][field] = value;
+
+        if (field === 'status' && (value === 'ready' || value === 'issue')) {
+            savedState[id].checked = true;
+        }
+        if (field === 'checked' && value === true && savedState[id].status === 'pending') {
+            savedState[id].status = 'ready';
+        }
+        if (field === 'checked' && value === false) {
+            savedState[id].status = 'pending';
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
+        renderChecklist();
+    }
+
+    function updateStats() {
+        let total = 0, checked = 0, ready = 0, issues = 0;
+
+        prodSuites.forEach(suite => {
+            suite.items.forEach(item => {
+                total++;
+                const s = savedState[item.id];
+                if (s) {
+                    if (s.checked) checked++;
+                    if (s.status === 'ready') ready++;
+                    if (s.status === 'issue') issues++;
+                }
+            });
+        });
+
+        document.getElementById('totalTests').innerText = total;
+        document.getElementById('checkedTests').innerText = checked;
+        document.getElementById('readyTests').innerText = ready;
+        document.getElementById('issueTests').innerText = issues;
+
+        const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
+        document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    function filterRows(mode, btn) {
+        document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.querySelectorAll('.test-row').forEach(row => {
+            const status = row.getAttribute('data-status');
+            const isChecked = row.getAttribute('data-checked') === 'true';
+
+            if (mode === 'all') {
+                row.style.display = '';
+            } else if (mode === 'unchecked') {
+                row.style.display = !isChecked ? '' : 'none';
+            } else if (mode === 'ready') {
+                row.style.display = status === 'ready' ? '' : 'none';
+            } else if (mode === 'issue') {
+                row.style.display = status === 'issue' ? '' : 'none';
+            }
+        });
+    }
+
+    function resetAllData() {
+        if (confirm('Yakin ingin mereset seluruh checklist kesiapan produksi ini?')) {
+            localStorage.removeItem(STORAGE_KEY);
+            savedState = {};
+            renderChecklist();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", renderChecklist);
+</script>
+
+</body>
+</html>
